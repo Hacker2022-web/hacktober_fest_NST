@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShadowHarness & ShadowWall | In-Flight Behavioral Firewall</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="cockpit-container">
+    <!-- Top Header & Security Bar -->
+    <header class="cockpit-header">
+      <div class="brand-group">
+        <div class="shield-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="title-row">
+            <h1>SHADOW<span class="highlight">HARNESS</span></h1>
+            <span class="version-tag">v1.0.0 HACKATHON CORE</span>
+          </div>
+          <p class="subtitle">In-Flight Behavioral Firewall & Time-Travel Recovery for AI Agents</p>
+        </div>
+      </div>
+
+      <!-- Telemetry Gauges -->
+      <div class="telemetry-gauges">
+        <div class="gauge-card">
+          <span class="gauge-label">FIREWALL STATUS</span>
+          <div class="status-indicator-badge active" id="fwStatusBadge">
+            <span class="pulse-dot"></span>
+            <span id="fwStatusText">ARMED (ACTIVE)</span>
+          </div>
+        </div>
+
+        <div class="gauge-card">
+          <span class="gauge-label">INTENT DRIFT SCORE</span>
+          <div class="drift-meter">
+            <div class="drift-bar-fill" id="driftBar" style="width: 0%;"></div>
+          </div>
+          <span class="gauge-val" id="driftVal">0.00</span>
+        </div>
+
+        <div class="gauge-card">
+          <span class="gauge-label">TAINT VIOLATIONS</span>
+          <span class="gauge-val text-red" id="taintCount">0</span>
+        </div>
+
+        <div class="gauge-card">
+          <span class="gauge-label">TIME-TRAVEL REWINDS</span>
+          <span class="gauge-val text-purple" id="rollbackCount">0</span>
+        </div>
+
+        <div class="gauge-card">
+          <span class="gauge-label">EVAL LATENCY</span>
+          <span class="gauge-val text-cyan" id="evalLatency">0 ms</span>
+        </div>
+      </div>
+
+      <!-- Protection Switch -->
+      <div class="protection-switch-group">
+        <label class="switch-title">HARNESS MODE</label>
+        <button class="toggle-protection-btn btn-protected" id="toggleProtectionBtn">
+          <span class="btn-icon">🛡️</span>
+          <span id="toggleProtectionLabel">PROTECTED</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace: Dual-Pane Layout -->
+    <main class="cockpit-main">
+      <!-- Left Pane: In-Flight Thought Stream & Agent Trajectory -->
+      <section class="pane left-pane">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span class="pane-icon">⚡</span>
+            <h2>IN-FLIGHT THOUGHT STREAM & EXECUTION SINK</h2>
+          </div>
+          <span class="pane-badge" id="streamStatus">IDLE</span>
+        </div>
+
+        <div class="trajectory-feed" id="trajectoryFeed">
+          <div class="feed-placeholder">
+            <div class="placeholder-icon">🛡️</div>
+            <h3>System Ready & Listening</h3>
+            <p>Select an attack or clean scenario below to initiate an autonomous agent trajectory.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right Pane: Lineage & Time-Travel Graph -->
+      <section class="pane right-pane">
+        <div class="pane-header">
+          <div class="pane-title">
+            <span class="pane-icon">⏪</span>
+            <h2>TIME-TRAVEL LINEAGE & CHECKPOINT GRAPH</h2>
+          </div>
+          <div class="header-actions">
+            <span class="lineage-summary" id="lineageSummary">0 Checkpoints Captured</span>
+          </div>
+        </div>
+
+        <div class="lineage-graph-container" id="lineageGraphContainer">
+          <div class="graph-placeholder">
+            <p>Checkpoints will be mapped visually as the agent advances through its reasoning loop.</p>
+          </div>
+        </div>
+
+        <!-- Checkpoint Detail Inspector Modal / Box -->
+        <div class="inspector-drawer" id="inspectorDrawer">
+          <div class="drawer-header">
+            <span class="drawer-title" id="inspectorTitle">Checkpoint State Frame</span>
+            <button class="close-drawer-btn" id="closeDrawerBtn">&times;</button>
+          </div>
+          <div class="drawer-content">
+            <pre class="code-preview" id="inspectorContent">Click on any checkpoint node above to inspect its immutable state frame.</pre>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom Controls & Scenario Launcher -->
+    <footer class="cockpit-controls">
+      <div class="scenario-buttons">
+        <button class="scenario-btn attack-btn" id="btnScenario1">
+          <span class="btn-badge">ATTACK 01</span>
+          <div class="btn-text">
+            <strong>Poisoned Invoice</strong>
+            <small>IPI &rarr; HTTP Credential Exfiltration</small>
+          </div>
+        </button>
+
+        <button class="scenario-btn attack-btn" id="btnScenario2">
+          <span class="btn-badge">ATTACK 02</span>
+          <div class="btn-text">
+            <strong>Rogue Pull Request</strong>
+            <small>IPI &rarr; Shell Destructive Command</small>
+          </div>
+        </button>
+
+        <button class="scenario-btn clean-btn" id="btnScenario3">
+          <span class="btn-badge">BENIGN</span>
+          <div class="btn-text">
+            <strong>Clean Document Review</strong>
+            <small>Zero False-Positives Check</small>
+          </div>
+        </button>
+      </div>
+
+      <div class="control-actions">
+        <button class="action-btn" id="btnForensics">
+          <span>📊</span> Forensics Log
+        </button>
+        <button class="action-btn" id="btnDiff">
+          <span>🔍</span> Diff State
+        </button>
+        <button class="action-btn secondary" id="clearBtn">
+          <span>↺</span> Clear Cockpit
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
