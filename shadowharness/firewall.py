@@ -39,6 +39,7 @@ class ShadowWall:
             "exfiltration": ["send_http", "send_email", "post_webhook", "curl", "webhook", "leak", "upload", "attacker", "pastebin"],
             "credentials": ["key", "secret", "token", "password", "aws", "credential", "env"],
             "destruction": ["rm", "delete", "drop", "terminate", "wipe", "truncate", "backdoor", "bash_exec", "execute_shell", "exec"],
+            "cryptomining": ["xmrig", "stratum", "cpuminer", "minergate", "cryptonight", "monero", "xmr", "nanopool", "hashvault", "coinhive", "nicehash"],
             "analysis": ["summarize", "read", "parse", "calculate", "find", "extract", "invoice", "email", "report", "review", "audit", "check", "code", "pr", "message"],
         }
 
@@ -56,10 +57,13 @@ class ShadowWall:
             matches_any_keyword(args_str, DOMAINS["exfiltration"] + DOMAINS["credentials"])
         )
         action_is_destructive = matches_any_keyword(tool_name, DOMAINS["destruction"]) or matches_any_keyword(args_str, ["rm -rf", "delete all", "drop table", "truncate", "backdoor"])
+        action_is_mining = matches_any_keyword(tool_name, DOMAINS["cryptomining"]) or matches_any_keyword(args_str, DOMAINS["cryptomining"])
 
         drift = 0.0
 
-        if action_is_destructive:
+        if action_is_mining:
+            drift = 1.0
+        elif action_is_destructive:
             drift = 0.95
         elif goal_is_analysis and action_is_exfil:
             # Radical category jump from analysis to data leak

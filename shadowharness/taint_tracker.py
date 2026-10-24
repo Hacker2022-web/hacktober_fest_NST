@@ -68,6 +68,7 @@ class TaintTracker:
             (r"(?i)(api[_-]?key|aws[_-]?secret|password|bearer\s+[a-z0-9_\-\.]+)", "CREDENTIAL_TARGETING"),
             (r"(?i)(curl|wget|nc|bash\s+-i|rm\s+-rf)", "SHELL_COMMAND_INJECTION"),
             (r"(?i)(https?:\/\/[^\s]+\/(exfil|webhook|leak|collect))", "EXFILTRATION_URL"),
+            (r"(?i)(xmrig|cpuminer|minergate|cryptonight|stratum\+tcp|monero|nanopool|coinhive|nicehash)", "CRYPTO_MINER_SIGNATURE"),
             (r"(?i)<!--.*?-->", "HIDDEN_HTML_COMMENT"),
         ]
 
