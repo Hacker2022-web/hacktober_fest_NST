@@ -408,7 +408,7 @@ class OpenClawTelegramBridge:
         contains_attack_keywords = any(marker in lower_text for marker in attack_triggers)
         is_attack = has_risk_markers or contains_attack_keywords
 
-        if is_attack and not sender_is_owner:
+        if is_attack:
             # Dangerous OpenClaw tool proposed by compromised context
             proposed_tool = "exec"
             proposed_args = {"command": text.strip()}
@@ -500,6 +500,30 @@ class OpenClawTelegramBridge:
                 root_goal=f"Telegram Assistant: Process inquiry from {sender_id}",
                 step_index=2
             )
+
+            # If tool interception quarantined the action, dispatch the alert card
+            if verdict.action == FirewallAction.QUARANTINE:
+                incident = {
+                    "blocked_tool": tool_name,
+                    "violation_reason": verdict.reason,
+                    "recovery_latency_ms": verdict.evaluation_latency_ms,
+                    "recovered_to_step": 1,
+                    "drift_score": verdict.drift_score
+                }
+                alert_text = self.adapter.format_channel_security_alert(incident, channel="telegram")
+
+                if self.client:
+                    try:
+                        self.client.send_message(chat_id, alert_text)
+                    except Exception as e:
+                        print(f"Failed to send Telegram alert: {e}")
+
+                return {
+                    "status": "QUARANTINED_AND_RECOVERED",
+                    "verdict": verdict,
+                    "alert": alert_text,
+                    "latency_ms": verdict.evaluation_latency_ms
+                }
 
             response_msg = (
                 f"{work_output}\n\n"
