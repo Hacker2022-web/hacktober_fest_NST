@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/static/style.css?v=6">
+  <link rel="stylesheet" href="/static/style.css?v=8">
 </head>
 <body>
   <!-- Top Navigation (4 Options, TasteCode layout) -->
@@ -285,7 +285,94 @@
           </div>
         </div>
       </div>
+
+      <!-- Small greyed-out development build caption -->
+      <p class="cockpit-dev-caption">UI shown is the development build,with demo sandbox.</p>
     </section>
+
+    <!-- How It Works Section (Linked from top nav #how) -->
+    <section class="how-section" id="how">
+      <div class="how-grid">
+        <div class="how-col-left">
+          <h2 class="how-title">how it works</h2>
+        </div>
+        <div class="how-col-right">
+          <p class="how-lead">
+            If a violation occurs, the system rolls back the affected state, sanitizes the execution context, resumes the clean goal, and streams live telemetry to dashboards and developer tools.
+          </p>
+          <p class="how-sub">
+            Around it, the rest of the harness: real-time taint tracking from untrusted sources to sensitive sinks, sub-millisecond checkpoint state rewinds, and an immutable forensic audit trail of every compromised thought.
+          </p>
+          <div class="how-meta-action">
+            <a href="#cockpit" class="how-tour-link">
+              <span>test an attack in the cockpit above</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m18 15-6-6-6 6"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quote Section: Formal Governance Statement -->
+    <section class="reins-quote-section" id="reins">
+      <div class="reins-quote-container">
+        <span class="reins-badge">deterministic execution governance</span>
+        <h2 class="reins-headline">Hold the reins of autonomous agency.</h2>
+        <p class="reins-subtext">
+          An in-flight behavioral firewall and execution harness for autonomous agents. Intercept indirect prompt injection and unauthorized tool execution in real time.
+        </p>
+        <div class="reins-actions">
+          <a class="btn-download" href="#quickstart">
+            <span>install quickstart</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          </a>
+          <a class="link-github" href="https://github.com/Hacker2022-web/hacktober_fest_NST" target="_blank" rel="noreferrer">
+            <span>view on github</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 17 17 7M8 7h9v9"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Questions / FAQ Section -->
+    <section class="questions-section" id="questions">
+      <div class="questions-header">
+        <h3 class="questions-title">questions</h3>
+        <p class="questions-sub">Key architectural clarifications on in-flight behavioral firewalling.</p>
+      </div>
+      <div class="questions-grid">
+        <div class="question-card">
+          <h4 class="q-title">How is this different from NeMo Guardrails or LlamaGuard?</h4>
+          <p class="q-answer">Pre-flight guardrails only inspect the initial user prompt. They are blind to data ingested during multi-step tool calls (e.g., invoices, scraped web pages, emails). Whipper inspects candidate tool calls in-flight before side-effects execute.</p>
+        </div>
+        <div class="question-card">
+          <h4 class="q-title">Does state rollback restart the entire workflow?</h4>
+          <p class="q-answer">No. Whipper checkpoints immutable agent memory at each step. On violation, it rewinds only to the last clean pre-execution frame (&lt;1ms), applies a security mask to neutralize the injection, and allows the agent to self-heal and finish its mission.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Editorial Footer -->
+    <footer class="editorial-footer" id="download">
+      <div class="footer-container">
+        <div class="footer-left">
+          <span class="footer-brand">whipper</span>
+          <span class="footer-tagline">· early beta 0.1.1 · free and open source</span>
+        </div>
+        <div class="footer-right">
+          <a href="https://github.com/Hacker2022-web/hacktober_fest_NST" target="_blank" rel="noreferrer" class="footer-link">GitHub</a>
+          <a href="#quickstart" class="footer-link">Quickstart</a>
+          <a href="#how" class="footer-link">How it works</a>
+          <a href="#questions" class="footer-link">Questions</a>
+        </div>
+      </div>
+    </footer>
   </main>
 
   <!-- Modal for Forensics & Checkpoint Diffs -->
