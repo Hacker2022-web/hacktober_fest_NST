@@ -88,6 +88,15 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("cannot read", err)
 
+    def test_scan_pdf_support(self):
+        code, out, _ = run_cli("scan", "--json", "samples/poisoned_invoice.pdf")
+        self.assertEqual(code, 1)
+        data = json.loads(out)
+        self.assertEqual(data["risk"], "critical")
+        rules = [f["rule"] for f in data["findings"]]
+        self.assertIn("command:data-exfiltration", rules)
+        self.assertIn("instruction-override", rules)
+
     def test_demo_and_aliases(self):
         code, out, _ = run_cli("demo", "invoice", "--json")
         self.assertEqual(code, 0)

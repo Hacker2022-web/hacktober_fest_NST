@@ -260,8 +260,17 @@ def cmd_scan(args) -> int:
             text, name = read_stdin_text(), "stdin"
         else:
             try:
-                with open(src, "r", encoding="utf-8", errors="replace") as fh:
-                    text = fh.read()
+                if src.lower().endswith(".pdf"):
+                    try:
+                        from pypdf import PdfReader
+                        reader = PdfReader(src)
+                        text = "\n".join(p.extract_text() or "" for p in reader.pages)
+                    except Exception:
+                        with open(src, "r", encoding="utf-8", errors="replace") as fh:
+                            text = fh.read()
+                else:
+                    with open(src, "r", encoding="utf-8", errors="replace") as fh:
+                        text = fh.read()
             except OSError as e:
                 raise CLIError(f"cannot read {src}: {e.strerror}")
             name = src
