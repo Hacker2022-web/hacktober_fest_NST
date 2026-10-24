@@ -1,0 +1,22 @@
+{
+  "id": "wippr-guard",
+  "name": "wippr guard",
+  "description": "Blocks prompt-injected tool calls before they run and tracks untrusted input.",
+  "activation": { "onStartup": true },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "wipprCommand": { "type": "string", "description": "Executable for wippr (default: wippr on PATH)" },
+      "wipprArgs": { "type": "array", "items": { "type": "string" }, "description": "Extra leading args, e.g. [\"-m\", \"wippr\"] when wipprCommand is python3" },
+      "gateUrl": { "type": "string", "description": "Use a running `wippr serve` instead of spawning, e.g. http://127.0.0.1:8000" },
+      "token": { "type": "string", "description": "Bearer token for gateUrl (see ~/.wippr/token)" },
+      "timeoutMs": { "type": "integer", "minimum": 1000, "maximum": 13000 },
+      "failClosed": { "type": "boolean", "description": "Block tool calls when wippr cannot be reached (default true)" },
+      "mode": { "type": "string", "enum": ["enforce", "monitor"] },
+      "ingestToolResults": { "type": "boolean" },
+      "ingestMessages": { "type": "boolean" },
+      "approvalTimeoutMs": { "type": "integer", "minimum": 10000 }
+    }
+  }
+}

@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="300" viewBox="0 0 1100 300" role="img" aria-label="Animation: wippr blocks a hijacked tool call, rewinds the agent, then lets the safe call run">
+  <title>How wippr stops a hijacked tool call</title>
+  <defs><marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#D5A52E"/></marker></defs>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+    .lbl { font-size: 19px; font-weight: 700; fill: #EFEBE2; letter-spacing: -0.4px; }
+    .sub { font-size: 13px; fill: #8A8780; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .cap { font-size: 15px; font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .bad { animation: bad 9.0s infinite; }
+    @keyframes bad {
+      0%, 4% { transform: translateX(0); opacity: 0; }
+      6% { opacity: 1; }
+      30% { transform: translateX(500px); opacity: 1; }
+      34% { transform: translateX(492px); opacity: 1; }
+      40%, 100% { transform: translateX(492px); opacity: 0; }
+    }
+    .wall { animation: wall 9.0s infinite; }
+    @keyframes wall {
+      0%, 29% { stroke: #3A3936; fill: #0E0E0E; }
+      31%, 46% { stroke: #E5604D; fill: #2A1512; }
+      50%, 70.5% { stroke: #3A3936; fill: #0E0E0E; }
+      72%, 80% { stroke: #8FCB7A; fill: #14200F; }
+      84%, 100% { stroke: #3A3936; fill: #0E0E0E; }
+    }
+    .stamp { opacity: 0; transform-origin: 640px 64px; animation: stamp 9.0s infinite; }
+    @keyframes stamp {
+      0%, 30% { opacity: 0; transform: scale(1.5) rotate(-3deg); }
+      33% { opacity: 1; transform: scale(1) rotate(-3deg); }
+      46% { opacity: 1; transform: scale(1) rotate(-3deg); }
+      50%, 100% { opacity: 0; transform: scale(1) rotate(-3deg); }
+    }
+    .rewind { opacity: 0; animation: rewind 9.0s infinite; }
+    @keyframes rewind { 0%, 40% { opacity: 0; stroke-dashoffset: 560; } 42% { opacity: 1; } 52% { stroke-dashoffset: 0; opacity: 1; } 58%, 100% { opacity: 0; stroke-dashoffset: 0; } }
+    .good { animation: good 9.0s infinite; }
+    @keyframes good {
+      0%, 56% { transform: translateX(0); opacity: 0; }
+      58% { opacity: 1; }
+      82% { transform: translateX(780px); opacity: 1; }
+      86%, 100% { transform: translateX(780px); opacity: 0; }
+    }
+    .okstamp { opacity: 0; animation: okstamp 9.0s infinite; }
+    @keyframes okstamp { 0%, 81% { opacity: 0; } 83%, 95% { opacity: 1; } 98%, 100% { opacity: 0; } }
+    .c1 { animation: c1 9.0s infinite; } @keyframes c1 { 0%, 4% { opacity: 0; } 6%, 29% { opacity: 1; } 31%, 100% { opacity: 0; } }
+    .c2 { opacity: 0; animation: c2 9.0s infinite; } @keyframes c2 { 0%, 31.5% { opacity: 0; } 33%, 44% { opacity: 1; } 45.5%, 100% { opacity: 0; } }
+    .c3 { opacity: 0; animation: c3 9.0s infinite; } @keyframes c3 { 0%, 46% { opacity: 0; } 47.5%, 56% { opacity: 1; } 57.5%, 100% { opacity: 0; } }
+    .c4 { opacity: 0; animation: c4 9.0s infinite; } @keyframes c4 { 0%, 58% { opacity: 0; } 59.5%, 95% { opacity: 1; } 98%, 100% { opacity: 0; } }
+    </style>
+  <rect width="1100" height="300" rx="16" fill="#131313"/><line x1="110" y1="140" x2="930" y2="140" stroke="#3A3936" stroke-width="2" stroke-dasharray="2 8" stroke-linecap="round"/><rect x="32" y="106" width="156" height="68" rx="14" fill="#0E0E0E" stroke="#3A3936" stroke-width="1"/><text class="lbl" x="110" y="146" text-anchor="middle">agent</text><text class="sub" x="110" y="202" text-anchor="middle">plans the next step</text><rect x="282" y="106" width="156" height="68" rx="14" fill="#0E0E0E" stroke="#3A3936" stroke-width="1"/><text class="lbl" x="360" y="146" text-anchor="middle">tool call</text><text class="sub" x="360" y="202" text-anchor="middle">send_http(…)</text><rect class="wall" x="562" y="106" width="156" height="68" rx="14" fill="#0E0E0E" stroke="#3A3936" stroke-width="2"/><text class="lbl" x="640" y="146" text-anchor="middle">wippr</text><text class="sub" x="640" y="202" text-anchor="middle">inspects in &lt;1 ms</text><rect x="852" y="106" width="156" height="68" rx="14" fill="#0E0E0E" stroke="#3A3936" stroke-width="1"/><text class="lbl" x="930" y="146" text-anchor="middle">shell · network</text><text class="sub" x="930" y="202" text-anchor="middle">side effects</text><circle class="bad" cx="150" cy="140" r="9" fill="#E5604D"/><circle class="good" cx="150" cy="140" r="9" fill="#8FCB7A"/><g class="stamp"><rect x="570" y="40" width="140" height="44" rx="8" fill="#131313" stroke="#E5604D" stroke-width="2.5"/><text x="640" y="70" text-anchor="middle" font-size="22" font-weight="800" fill="#E5604D" letter-spacing="-0.5">BLOCKED</text></g><g class="okstamp"><text x="930" y="74" text-anchor="middle" font-size="18" font-weight="700" fill="#8FCB7A">✓ write_file ran</text></g><path class="rewind" d="M 640 174 C 600 250, 160 250, 110 174" fill="none" stroke="#D5A52E" stroke-width="2.5" stroke-dasharray="560" stroke-dashoffset="560" marker-end="url(#arrow)"/><text class="c1 cap" x="550.0" y="282" text-anchor="middle" fill="#EFEBE2">1  untrusted invoice hijacks the agent → it proposes sending your AWS keys</text><text class="c2 cap" x="550.0" y="282" text-anchor="middle" fill="#E5604D">2  taint violation: read_invoice → send_http. The call never runs.</text><text class="c3 cap" x="550.0" y="282" text-anchor="middle" fill="#D5A52E">3  ↺ rewind to the last clean checkpoint in 0.02 ms · injected text masked</text><text class="c4 cap" x="550.0" y="282" text-anchor="middle" fill="#8FCB7A">4  the agent finishes the original task. No restart.</text>
+</svg>

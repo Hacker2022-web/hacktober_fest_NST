@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wippr"
+dynamic = ["version"]
+description = "In-flight behavioral firewall and time-travel execution harness for autonomous agents"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "wippr contributors" }]
+keywords = ["agents", "security", "prompt-injection", "firewall", "runtime"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security",
+]
+dependencies = [
+    "pydantic>=2.0",
+    "fastapi>=0.100",
+    "uvicorn>=0.22",
+    "websockets>=11.0",
+    "certifi>=2023.0",
+]
+
+[project.optional-dependencies]
+pdf = ["pypdf>=3.0"]
+dev = ["httpx>=0.24"]
+
+[project.scripts]
+wippr = "wippr.cli:entrypoint"
+
+[project.urls]
+Homepage = "https://github.com/Hacker2022-web/hacktober_fest_NST"
+Issues = "https://github.com/Hacker2022-web/hacktober_fest_NST/issues"
+
+[tool.setuptools.dynamic]
+version = { attr = "wippr.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["wippr*"]
+
+[tool.setuptools.package-data]
+wippr = ["web/*", "integrations/openclaw/*.ts", "integrations/openclaw/*.mjs", "integrations/openclaw/*.json", "integrations/openclaw/*.md"]

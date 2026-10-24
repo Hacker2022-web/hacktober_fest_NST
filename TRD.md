@@ -1,8 +1,8 @@
-# ShadowHarness — Technical Requirements Document (TRD)
+# WipprHarness — Technical Requirements Document (TRD)
 
 > **Document Version:** 2.1.0-UNIFIED  
 > **Release Date:** October 25, 2026  
-> **Author:** Team ShadowHarness  
+> **Author:** Team Wippr  
 > **Status:** Implemented & Verified  
 > **Companion Document:** [PRD.md](file:///Users/sahildehadray/wipper/PRD.md)
 
@@ -12,7 +12,7 @@
 
 ### 1.1 High-Level Architecture Overview
 
-ShadowHarness operates as an in-flight execution firewall, telemetry bus, and state recovery middleware that wraps an autonomous AI agent's tool execution runtime. It sits directly between the agent's reasoning loop (LangChain, CrewAI, AutoGen, DeepSeek-Harness, OpenClaw) and the underlying host operating system / network sinks.
+WipprHarness operates as an in-flight execution firewall, telemetry bus, and state recovery middleware that wraps an autonomous agent's tool execution runtime. It sits directly between the agent's reasoning loop (LangChain, CrewAI, AutoGen, DeepSeek-Harness, OpenClaw) and the underlying host operating system / network sinks.
 
 ```mermaid
 flowchart TB
@@ -31,9 +31,9 @@ flowchart TB
         DSH["⚡ DeepSeek Adapter<br/>(adapters/deepseek.py)"]
     end
 
-    subgraph CoreEngine["ShadowHarness Core Engine"]
-        A["🤖 Agent Reasoning Loop<br/>(AutonomousAgent / ReAct)"]
-        SW["🛡️ ShadowWall In-Flight Firewall<br/>(wall.py)"]
+    subgraph CoreEngine["WipprHarness Core Engine"]
+        A["Agent Reasoning Loop<br/>(AutonomousAgent / ReAct)"]
+        SW["🛡️ WipprWall In-Flight Firewall<br/>(wall.py)"]
         PE["📋 Declarative Policy Engine<br/>(policy.py)"]
         TE["🏷️ Taint Lineage Engine<br/>(taint_tracker.py)"]
         ID["📐 Intent Divergence Engine<br/>(Cosine / Semantic Drift)"]
@@ -72,8 +72,8 @@ flowchart TB
 
 ```mermaid
 classDiagram
-    class ShadowHarness {
-        +firewall: ShadowWall
+    class WipprHarness {
+        +firewall: WipprWall
         +checkpointer: CheckpointManager
         +quarantine_mgr: QuarantineManager
         +policy_engine: PolicyEngine
@@ -83,7 +83,7 @@ classDiagram
         +handle_quarantine_and_recover(infection_step, current_step, tool, args, verdict) Dict
     }
 
-    class ShadowWall {
+    class WipprWall {
         +taint_tracker: TaintTracker
         +divergence_threshold: float
         +calculate_intent_divergence(root_goal, tool_call, scratchpad) float
@@ -120,7 +120,7 @@ classDiagram
     }
 
     class OpenClawAdapter {
-        +harness: ShadowHarness
+        +harness: WipprHarness
         +verified_owner_ids: Set~str~
         +process_inbound_message(channel, sender_id, content, sender_is_owner) TaintRecord
         +intercept_openclaw_tool(tool_name, arguments, root_goal, scratchpad) FirewallVerdict
@@ -131,12 +131,12 @@ classDiagram
         +token: str
         +owners: Set~str~
         +client: TelegramClient
-        +engine: AssistantActionEngine
+        +engine: AgentActionEngine
         +run() void
         +handle_message(msg) void
     }
 
-    class AssistantActionEngine {
+    class AgentActionEngine {
         +fetch_pdf(text) Dict
         +install_package(text) Dict
         +remediate_crypto_miner() Dict
@@ -156,7 +156,7 @@ classDiagram
     }
 
     class DeepSeekHarnessAdapter {
-        +harness: ShadowHarness
+        +harness: WipprHarness
         +hooks: Dict~str, List~Callable~~
         +register_plugin_hook(hook_name, fn) void
         +before_tool_execute(tool_name, args, ctx) FirewallVerdict
@@ -166,24 +166,24 @@ classDiagram
     }
 
     class UnifiedHarnessHub {
-        +harness: ShadowHarness
+        +harness: WipprHarness
         +openclaw: OpenClawAdapter
         +deepseek: DeepSeekHarnessAdapter
         +route_inbound_event(framework, event_type, **kwargs) TaintRecord
         +intercept_tool(framework, tool_name, arguments, root_goal, scratchpad) FirewallVerdict
     }
 
-    ShadowHarness --> ShadowWall
-    ShadowHarness --> CheckpointManager
-    ShadowHarness --> QuarantineManager
-    ShadowHarness --> PolicyEngine
-    ShadowWall --> TaintTracker
-    OpenClawAdapter --> ShadowHarness
+    WipprHarness --> WipprWall
+    WipprHarness --> CheckpointManager
+    WipprHarness --> QuarantineManager
+    WipprHarness --> PolicyEngine
+    WipprWall --> TaintTracker
+    OpenClawAdapter --> WipprHarness
     OpenClawTelegramBridge --> OpenClawAdapter
     OpenClawTelegramBridge --> TelegramClient
-    OpenClawTelegramBridge --> AssistantActionEngine
-    DeepSeekHarnessAdapter --> ShadowHarness
-    UnifiedHarnessHub --> ShadowHarness
+    OpenClawTelegramBridge --> AgentActionEngine
+    DeepSeekHarnessAdapter --> WipprHarness
+    UnifiedHarnessHub --> WipprHarness
     UnifiedHarnessHub --> OpenClawAdapter
     UnifiedHarnessHub --> DeepSeekHarnessAdapter
 ```
@@ -199,7 +199,7 @@ sequenceDiagram
     actor External as Untrusted Source / Web / Invoice
     participant Agent as AutonomousAgent (ReAct)
     participant Check as CheckpointManager
-    participant Wall as ShadowWall
+    participant Wall as WipprWall
     participant Taint as TaintTracker
     participant Tool as ToolRuntime
 
@@ -231,9 +231,9 @@ sequenceDiagram
     actor Phone as User Phone (@wippr1)
     participant TG as Telegram Bot (@wipprbot)
     participant Bridge as OpenClawTelegramBridge
-    participant Engine as AssistantActionEngine
+    participant Engine as AgentActionEngine
     participant Client as TelegramClient (urllib)
-    participant Wall as ShadowWall
+    participant Wall as WipprWall
     participant FS as Local Workspace FS
 
     Phone->>TG: Message: "share file PRD.md"
@@ -258,7 +258,7 @@ sequenceDiagram
 
 ## 2. Core Engineering Specifications & Component Implementation
 
-### 2.1 Declarative Policy Engine (`shadowharness/policy.py`)
+### 2.1 Declarative Policy Engine (`wippr/policy.py`)
 
 The Policy Engine executes prioritized, declarative security rules before any tool invocation. Rules are evaluated in descending priority order ($100 \to 10$).
 
@@ -292,7 +292,7 @@ class Rule:
 
 ---
 
-### 2.2 Taint Lineage Tracking & Risk Markers (`shadowharness/taint_tracker.py`)
+### 2.2 Taint Lineage Tracking & Risk Markers (`wippr/taint_tracker.py`)
 
 Taint tracking monitors data flow from ingestion sources to execution sinks, recording token lineage across intermediate tools:
 
@@ -313,9 +313,9 @@ $$\text{Data Ingress} \xrightarrow{\text{tag}} \text{Tool}_1 \xrightarrow{\text{
 
 ---
 
-### 2.3 Semantic Intent Divergence Engine (`shadowharness/wall.py`)
+### 2.3 Semantic Intent Divergence Engine (`wippr/wall.py`)
 
-ShadowWall measures semantic distance between the root goal $G$ and candidate tool action $T(a)$. The divergence metric $\Delta(G, T_a) \in [0.0, 1.0]$ combines:
+WipprWall measures semantic distance between the root goal $G$ and candidate tool action $T(a)$. The divergence metric $\Delta(G, T_a) \in [0.0, 1.0]$ combines:
 1. **Lexical Jaccard & Token Overlap**: Token distance between goal nouns/verbs and tool invocation arguments.
 2. **Semantic Category Distance**: Vector projection comparing declared task intent (e.g. `audit`, `summarize`) with candidate sink capability (e.g. `exfiltrate`, `destroy`).
 3. **Domain Cluster Matching**: Explicit domain scoring mapping crypto-mining pools and exfiltration webhooks directly to $\Delta = 1.00$.
@@ -328,7 +328,7 @@ $$\Delta(G, T_a) = 1.0 - \left( w_1 \cdot \text{Cosine}(v_G, v_T) + w_2 \cdot \t
 
 ---
 
-### 2.4 State Checkpoint & Time-Travel State Recovery (`shadowharness/checkpointer.py`, `backends.py`)
+### 2.4 State Checkpoint & Time-Travel State Recovery (`wippr/checkpointer.py`, `backends.py`)
 
 Delta checkpointing snapshots immutable state frames prior to tool execution turns:
 
@@ -368,7 +368,7 @@ This breaks infinite retry loops and forces the agent to complete the goal safel
 
 ---
 
-### 2.5 Quarantine & Active Remediation Engine (`shadowharness/quarantine.py`, `telegram_bot.py`)
+### 2.5 Quarantine & Active Remediation Engine (`wippr/quarantine.py`, `telegram_bot.py`)
 
 #### Trajectory Isolation:
 Freezes execution before side-effects occur. Preserves:
@@ -378,7 +378,7 @@ Freezes execution before side-effects occur. Preserves:
 - `checkpoint_before_id`: Identifier of the last clean checkpoint for time-travel restoration.
 
 #### Active Remediation Engine (`remediate_crypto_miner()`):
-When a crypto-mining attack or rogue command is detected, ShadowHarness triggers active host remediation:
+When a crypto-mining attack or rogue command is detected, WipprHarness triggers active host remediation:
 1. **Process Table Inspection**: Executes `ps -A -o pid,command` via subprocess.
 2. **Signature Matching**: Matches running processes against miner signatures (`xmrig`, `cpuminer`, `minergate`, `cryptonight`, `stratum`).
 3. **Process Termination**:
@@ -388,7 +388,7 @@ When a crypto-mining attack or rogue command is detected, ShadowHarness triggers
 
 ---
 
-### 2.6 OpenClaw Multi-Channel Ingress & Live Telegram Gateway (`shadowharness/telegram_bot.py`, `adapters/openclaw.py`)
+### 2.6 OpenClaw Multi-Channel Ingress & Live Telegram Gateway (`wippr/telegram_bot.py`, `adapters/openclaw.py`)
 
 #### Zero-Dependency HTTP Client:
 Built strictly on Python's standard library `urllib.request`. Includes automatic SSL context configuration for macOS certificate authority fallback:
@@ -425,9 +425,9 @@ req = urllib.request.Request(
 
 ---
 
-### 2.7 DeepSeek-Harness Cordis Plugin Architecture (`shadowharness/adapters/deepseek.py`)
+### 2.7 DeepSeek-Harness Cordis Plugin Architecture (`wippr/adapters/deepseek.py`)
 
-ShadowHarness interfaces with DeepSeek-Harness via non-invasive microkernel lifecycle hooks:
+WipprHarness interfaces with DeepSeek-Harness via non-invasive microkernel lifecycle hooks:
 
 ```python
 class DeepSeekHarnessAdapter:
@@ -447,7 +447,7 @@ class DeepSeekHarnessAdapter:
 
 ---
 
-### 2.8 Unified Harness Hub (`shadowharness/hub.py`)
+### 2.8 Unified Harness Hub (`wippr/hub.py`)
 
 Coordinates telemetry, taint tracking, and tool interception across heterogeneous agent runtimes:
 
@@ -464,7 +464,7 @@ class UnifiedHarnessHub:
 
 ## 3. Verified Benchmark Results & Test Suite Scorecard
 
-ShadowHarness is validated against an automated 20-test test suite executed via Python's standard `unittest` runner.
+WipprHarness is validated against an automated 20-test test suite executed via Python's standard `unittest` runner.
 
 ### 3.1 Performance SLA Scorecard
 
@@ -489,7 +489,7 @@ Ran 20 tests in 0.618s — ALL OK (100% Passing)
 | # | Test Method Name | Target Subsystem | Description & Verified Invariant | Result |
 |:---:|:---|:---|:---|:---:|
 | 1 | `test_taint_propagation_and_sink_gating` | TaintTracker / Policy | Ingesting poisoned prompt blocks P0 sink (`send_http`) while permitting P2 sink (`summarize`). | ✅ PASS |
-| 2 | `test_intent_divergence_detection` | ShadowWall / Scoring | Divergence engine flags 0.85+ drift when agent diverges from invoice audit to credential theft. | ✅ PASS |
+| 2 | `test_intent_divergence_detection` | WipprWall / Scoring | Divergence engine flags 0.85+ drift when agent diverges from invoice audit to credential theft. | ✅ PASS |
 | 3 | `test_end_to_end_poisoned_invoice_recovery` | AutonomousAgent / Harness | End-to-end execution of poisoned invoice scenario: intercepts threat, rewinds in $<50\text{ms}$, completes clean. | ✅ PASS |
 | 4 | `test_end_to_end_malicious_pr_recovery` | AutonomousAgent / Harness | Catches destructive shell injection (`rm -rf`) in git PR, rolls back state, and produces safe audit. | ✅ PASS |
 | 5 | `test_unprotected_agent_gets_compromised` | Baseline Validation | Confirms unprotected agent naively executes malicious injection, verifying vulnerability baseline. | ✅ PASS |
@@ -571,23 +571,23 @@ Ran 20 tests in 0.618s — ALL OK (100% Passing)
 
 ## 6. CLI Command Architecture & Deployment
 
-The `shadowharness` CLI is implemented in `shadowharness/cli.py` using Python's standard library `argparse`:
+The `wippr` CLI is implemented in `wippr/cli.py` using Python's standard library `argparse`:
 
 ```bash
 # 1. Start live Telegram bot gateway
-shadowharness openclaw telegram --token "8808372469:AAEXlTkH_g9qZ_W6P91cIZbqsRp0OHpk4Bc" --owner @wippr1
+wippr openclaw telegram --token "8808372469:AAEXlTkH_g9qZ_W6P91cIZbqsRp0OHpk4Bc" --owner @wippr1
 
 # 2. Execute command under in-flight firewall
-shadowharness exec "python3 test.py" --goal "Process invoice"
+wippr exec "python3 test.py" --goal "Process invoice"
 
 # 3. Intercept unauthorized crypto-miner command (quarantined pre-flight)
-shadowharness exec "xmrig --url stratum+tcp://mine.pool:3333"
+wippr exec "xmrig --url stratum+tcp://mine.pool:3333"
 
 # 4. Run automated test suite & performance scorecard
-shadowharness test
+wippr test
 
 # 5. Launch web cockpit and telemetry server
-shadowharness serve --port 8000
+wippr serve --port 8000
 ```
 
 ---

@@ -1,0 +1,14 @@
+{
+  "name": "wippr-guard",
+  "version": "1.1.0",
+  "description": "OpenClaw plugin: wippr in-flight firewall for tool calls",
+  "type": "module",
+  "openclaw": {
+    "extensions": [
+      "./index.ts"
+    ]
+  },
+  "scripts": {
+    "test": "node --test guard.test.mjs"
+  }
+}

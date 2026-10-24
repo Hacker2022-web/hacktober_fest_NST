@@ -40,3 +40,7 @@ Thumbs.db
 # IDE configuration
 .vscode/
 .idea/
+
+# Local runtime artifacts
+uploads/
+wippr_checkpoints.db
