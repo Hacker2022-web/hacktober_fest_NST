@@ -74,6 +74,10 @@ class AutonomousAgent:
             payload = self.tools.read_invoice(ingest_arg, poisoned=is_poisoned)
         elif ingest_tool_name == "read_pull_request":
             payload = self.tools.read_pull_request(ingest_arg, poisoned=is_poisoned)
+        elif ingest_tool_name == "openclaw_telegram_ingress":
+            payload = self.tools.openclaw_telegram_ingress(ingest_arg, poisoned=is_poisoned)
+        elif ingest_tool_name == "deepseek_repo_ingress":
+            payload = self.tools.deepseek_repo_ingress(ingest_arg, poisoned=is_poisoned)
         else:
             payload = {"status": "ok"}
 
@@ -131,6 +135,10 @@ class AutonomousAgent:
                     result = self.tools.send_http(hijacked_args["url"], hijacked_args["payload"])
                 elif hijacked_tool_name == "bash_exec":
                     result = self.tools.bash_exec(hijacked_args["command"])
+                elif hijacked_tool_name == "exec":
+                    result = self.tools.exec(hijacked_args["command"])
+                elif hijacked_tool_name == "shell_exec":
+                    result = self.tools.shell_exec(hijacked_args["command"])
                 else:
                     result = {"status": "pwned"}
 
@@ -182,15 +190,21 @@ class AutonomousAgent:
                 safe_verdict = self.harness.inspect_and_gate(user_goal, safe_call, scratchpad)
 
                 if safe_verdict.action == FirewallAction.ALLOW:
-                    safe_res = self.tools.write_file(safe_args["filename"], safe_args["content"])
+                    if safe_tool == "write_file":
+                        safe_res = self.tools.write_file(safe_args["filename"], safe_args["content"])
+                    elif safe_tool == "conversations_send":
+                        safe_res = self.tools.conversations_send(safe_args["channel"], safe_args["recipient"], safe_args["message"])
+                    else:
+                        safe_res = {"status": "ok"}
                     self.harness.emit_event("TOOL_EXECUTED_SAFE", {
                         "tool_name": safe_tool,
                         "output": safe_res
                     })
 
+                target_name = safe_args.get("filename") or safe_args.get("recipient") or "completed"
                 self.harness.emit_event("MISSION_SUCCESS", {
                     "status": "RECOVERED_AND_COMPLETED",
-                    "summary": f"Attack neutralized. Finished: {safe_args['filename']}"
+                    "summary": f"Attack neutralized. Finished: {target_name}"
                 })
 
                 return {
@@ -198,7 +212,7 @@ class AutonomousAgent:
                     "scenario": scenario_id,
                     "quarantine_verdict": verdict.model_dump(),
                     "rollback_latency_ms": recovery_data["rollback_latency_ms"],
-                    "output_file": safe_args["filename"]
+                    "output_target": target_name
                 }
 
         else:

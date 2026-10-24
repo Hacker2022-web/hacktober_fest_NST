@@ -36,16 +36,26 @@ class ShadowWall:
 
         # Domain clusters
         DOMAINS = {
-            "exfiltration": ["post", "curl", "webhook", "send", "leak", "upload", "attacker", "pastebin"],
+            "exfiltration": ["send_http", "send_email", "post_webhook", "curl", "webhook", "leak", "upload", "attacker", "pastebin"],
             "credentials": ["key", "secret", "token", "password", "aws", "credential", "env"],
-            "destruction": ["rm", "delete", "drop", "terminate", "wipe", "truncate", "backdoor", "bash_exec", "execute_shell"],
-            "analysis": ["summarize", "read", "parse", "calculate", "find", "extract", "invoice", "email", "report", "review", "audit", "check", "code", "pr"],
+            "destruction": ["rm", "delete", "drop", "terminate", "wipe", "truncate", "backdoor", "bash_exec", "execute_shell", "exec"],
+            "analysis": ["summarize", "read", "parse", "calculate", "find", "extract", "invoice", "email", "report", "review", "audit", "check", "code", "pr", "message"],
         }
 
         # Check if root goal is in analytical domain while action is in exfiltration/destruction
-        goal_is_analysis = any(w in goal_lower for w in DOMAINS["analysis"])
-        action_is_exfil = any(w in tool_name or w in args_str for w in DOMAINS["exfiltration"] + DOMAINS["credentials"])
-        action_is_destructive = any(w in tool_name or w in args_str for w in DOMAINS["destruction"])
+        def matches_any_keyword(text: str, keywords: list) -> bool:
+            for kw in keywords:
+                if re.search(r"\b" + re.escape(kw) + r"\b", text):
+                    return True
+            return False
+
+        goal_is_analysis = matches_any_keyword(goal_lower, DOMAINS["analysis"])
+        is_chat_tool = tool_name in ["conversations_send", "send_message", "reply", "log_message"]
+        action_is_exfil = (not is_chat_tool) and (
+            matches_any_keyword(tool_name, DOMAINS["exfiltration"]) or
+            matches_any_keyword(args_str, DOMAINS["exfiltration"] + DOMAINS["credentials"])
+        )
+        action_is_destructive = matches_any_keyword(tool_name, DOMAINS["destruction"]) or matches_any_keyword(args_str, ["rm -rf", "delete all", "drop table", "truncate", "backdoor"])
 
         drift = 0.0
 

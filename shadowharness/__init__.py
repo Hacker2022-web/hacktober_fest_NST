@@ -20,8 +20,16 @@ from .policy import PolicyEngine, Rule, Action, InterceptionContext, PolicyDecis
 from .quarantine import QuarantineManager, QuarantinedTrajectory
 from .backends import StorageBackend, MemoryBackend, SQLiteBackend
 from .proxy import ToolProxy, wrap_tools, SecurityException
+from .adapters.openclaw import OpenClawAdapter, OPENCLAW_DANGEROUS_TOOLS
+from .adapters.deepseek import DeepSeekHarnessAdapter, DEEPSEEK_HARNESS_DANGEROUS_TOOLS
+from .hub import UnifiedHarnessHub
 
 __all__ = [
+    "UnifiedHarnessHub",
+    "OpenClawAdapter",
+    "OPENCLAW_DANGEROUS_TOOLS",
+    "DeepSeekHarnessAdapter",
+    "DEEPSEEK_HARNESS_DANGEROUS_TOOLS",
     "ShadowHarness",
     "ShadowWall",
     "TaintTracker",

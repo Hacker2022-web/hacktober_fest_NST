@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnScenario1 = document.getElementById('btnScenario1');
   const btnScenario2 = document.getElementById('btnScenario2');
   const btnScenario3 = document.getElementById('btnScenario3');
+  const btnScenario4 = document.getElementById('btnScenario4');
+  const btnScenario5 = document.getElementById('btnScenario5');
   const clearBtn = document.getElementById('clearBtn');
 
   // State
@@ -407,6 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
   btnScenario1.onclick = () => triggerScenario('poisoned_invoice');
   btnScenario2.onclick = () => triggerScenario('malicious_pr');
   btnScenario3.onclick = () => triggerScenario('clean_workflow');
+  if (btnScenario4) {
+    btnScenario4.onclick = () => triggerScenario('openclaw_telegram_exploit');
+  }
+  if (btnScenario5) {
+    btnScenario5.onclick = () => triggerScenario('deepseek_r1_code_poisoning');
+  }
 
   // Start WebSocket
   initWebSocket();

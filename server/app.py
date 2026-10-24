@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from shadowharness import ShadowHarness
+from shadowharness import ShadowHarness, OpenClawAdapter, DeepSeekHarnessAdapter
 from agent import AutonomousAgent, SCENARIOS
 
 app = FastAPI(title="ShadowHarness Security Cockpit")
@@ -103,8 +103,10 @@ async def run_scenario_endpoint(req: RunRequest):
     global latest_harness
     loop = asyncio.get_running_loop()
 
-    # Create harness with async event bridge
+    # Create harness with async event bridge and multi-framework adapters
     latest_harness = ShadowHarness()
+    OpenClawAdapter(latest_harness)
+    DeepSeekHarnessAdapter(latest_harness)
 
     def sync_listener(event_type: str, payload: Dict[str, Any]):
         # Schedule the async broadcast on the running event loop

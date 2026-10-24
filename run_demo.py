@@ -39,9 +39,16 @@ def run_cli_demo():
 
 def main():
     if len(sys.argv) > 1 and sys.argv[1] == "--cli":
-        run_cli_demo()
+        # Pass remaining arguments to the ShadowHarness CLI
+        from shadowharness.cli import main as cli_main
+        sys.argv = [sys.argv[0]] + sys.argv[2:]
+        cli_main()
+    elif len(sys.argv) > 1 and sys.argv[1] in ["run", "openclaw", "deepseek", "test", "interactive"]:
+        from shadowharness.cli import main as cli_main
+        cli_main()
     else:
         print("\n🚀 Starting ShadowHarness Real-Time Telemetry Cockpit on http://127.0.0.1:8000 ...")
+        print("💡 Tip: Run 'python3 run_demo.py --cli' or 'python3 -m shadowharness.cli' for the interactive CLI mode.\n")
         uvicorn.run("server.app:app", host="127.0.0.1", port=8000, reload=False)
 
 

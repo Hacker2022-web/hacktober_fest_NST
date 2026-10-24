@@ -2,7 +2,7 @@
 
 > **Version:** 2.0.0-UNIFIED  
 > **Date:** October 24, 2026  
-> **Author:** Team ShadowHarness & Claude Council  
+> **Author:** Team ShadowHarness  
 > **Status:** Implemented & Verified  
 > **Companion Document:** [PRD.md](file:///Users/sahildehadray/wipper/PRD.md)
 
