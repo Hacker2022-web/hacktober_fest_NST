@@ -44,3 +44,9 @@ Thumbs.db
 # Local runtime artifacts
 uploads/
 wippr_checkpoints.db
+
+# Agent configuration
+.agents/
+GEMINI.md
+CLAUDE.md
+AGENTS.md
