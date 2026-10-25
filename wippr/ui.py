@@ -111,6 +111,46 @@ def rule(width: Optional[int] = None) -> str:
     return theme.dim(theme.sym("dash") * (width or min(term_width(), 88)))
 
 
+BANNER_ART = [
+    r"██╗    ██╗██╗██████╗ ██████╗ ██████╗ ",
+    r"██║    ██║██║██╔══██╗██╔══██╗██╔══██╗",
+    r"██║ █╗ ██║██║██████╔╝██████╔╝██████╔╝",
+    r"██║███╗██║██║██╔═══╝ ██╔═══╝ ██╔══██╗",
+    r"╚███╔███╔╝██║██║     ██║     ██║  ██║",
+    r" ╚══╝╚══╝ ╚═╝╚═╝     ╚═╝     ╚═╝  ╚═╝",
+]
+
+BANNER_ASCII = [
+    r" _    _ _                 ",
+    r"| |  | (_)                ",
+    r"| |  | |_ _ __  _ __  _ __ ",
+    r"| |/\| | | '_ \| '_ \| '__|",
+    r"\  /\  / | |_) | |_) | |   ",
+    r" \/  \/|_| .__/| .__/|_|   ",
+]
+
+
+def print_banner(subtitle: Optional[str] = None, version: str = "1.1.0") -> None:
+    """Prints the stylish big-letter wippr ASCII banner."""
+    if os.environ.get("WIPPR_NO_BANNER"):
+        return
+    art = BANNER_ART if theme.unicode else BANNER_ASCII
+    side = [
+        "",
+        f"  {theme.bold('wippr')} · {theme.bold('IN-FLIGHT BEHAVIORAL FIREWALL')}",
+        f"  {theme.badge('v' + version, 'info')}  {theme.dim('local zero-trust runtime')}",
+        f"  {theme.dim(subtitle or 'Sub-millisecond tool gating · Data taint tracking · State rewind')}",
+        "",
+        "",
+    ]
+    while len(side) < len(art):
+        side.append("")
+    out()
+    for l, s in zip(art, side):
+        out("  " + theme.accent(l) + s)
+    out()
+
+
 def header(title: str, subtitle: str = "") -> None:
     """Section heading: '▌ title  subtitle'."""
     mark = theme.accent("▌" if theme.unicode else "|")
